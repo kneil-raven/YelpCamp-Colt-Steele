@@ -1,6 +1,7 @@
 const express = require('express');
 const methodOverride = require('method-override');
 const app = express();
+const ejsMate = require('ejs-mate');
 const path = require('path');
 const mongoose = require('mongoose');
 const Campground = require('./models/campground');
@@ -25,7 +26,8 @@ db.once('open', () => {
 //     console.error(`Error!!`, error);
 // })
 
-
+// use ejsMate to ejs engine
+app.engine('ejs', ejsMate);
 // set view engine middleware as ejs
 app.set('view engine', 'ejs')
 app.set('views', path.join(__dirname, 'views'));
