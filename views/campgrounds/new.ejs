@@ -2,18 +2,22 @@
 <div class="row">
     <h1 class="text-center">New Campground</h1>
     <div class="col-6 offset-3">
-        <form action="/campgrounds" method="post">
+        <form action="/campgrounds" method="post" novalidate class="validated-form">
             <div class="mb-3">
                 <label class="form-label" for="title">Title</label>
-                <input class="form-control" type="text" id="title" name="campground[title]">
+                <input class="form-control" type="text" id="title" name="campground[title]" required>
+                <div class="valid-feedback">Looks Good!</div>
+                <div class="invalid-feedback">Insert Campground Name!</div>
             </div>
             <div class="mb-3">
                 <label class="form-label" for="location">Location</label>
-                <input class="form-control" type="text" id="location" name="campground[location]">
+                <input class="form-control" type="text" id="location" name="campground[location]" required>
+                <div class="valid-feedback">Looks Good!</div>
             </div>
             <div class="mb-3">
                 <label class="form-label" for="location">Image URL</label>
-                <input class="form-control" type="text" id="location" name="campground[image]">
+                <input class="form-control" type="text" id="location" name="campground[image]" required>
+                <div class="valid-feedback">Looks Good!</div>
             </div>
             <!-- price -->
             <div class="mb-3">
@@ -26,10 +30,8 @@
                     placeholder="0.00"
                     aria-label="Amount (to the nearest dollar)"
                     aria-describedby="price-label"
-                    name = "campground[price]">
-                    <!-- <div class="input-group-append">
-                      <span class="input-group-text">.00</span>
-                    </div> -->
+                    name = "campground[price]" required>
+                    <div class="valid-feedback">Looks Good!</div>
                 </div>
                 <!--  -->
             </div>
@@ -38,7 +40,8 @@
                 <div class="input-group">
                     <label class="form-label" for="description">Description</label>
                 </div>
-                  <textarea class="form-control" id="description"></textarea>
+                  <textarea class="form-control" id="description" required></textarea>
+                  <div class="valid-feedback">Looks Good!</div>
             </div>
             <div class="mb-3">
                 <button class="btn btn-success">Add Campground</button>
