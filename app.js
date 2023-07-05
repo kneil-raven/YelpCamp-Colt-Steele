@@ -51,9 +51,13 @@ Campgrounds Section Starts Here
 
 =================================*/
 // display all campgrounds
-app.get('/campgrounds', async(req, res) => {
+app.get('/campgrounds', async(req, res, next) => {
+    try {
     const campgrounds = await Campground.find({});
     res.render('campgrounds/index', {campgrounds});
+    } catch (e) {
+        next(e)
+    }
 })
 
 // form to create new campground
@@ -62,41 +66,69 @@ app.get('/campgrounds/new', (req, res) => {
 })
 
 // create new campground in the database
-app.post('/campgrounds', async(req, res) => {
+app.post('/campgrounds', async(req, res, next) => {
+    try {
     const campground = new Campground(req.body.campground);
     await campground.save();
     res.redirect(`/campgrounds/${campground._id}`)
+    } catch(e) {
+        // display the error type and message on console
+        console.log(e.message)
+        next(e);
+    }
 })
 
 // show details for a specific campground
-app.get('/campgrounds/:id', async(req, res) => {
+app.get('/campgrounds/:id', async(req, res, next) => {
+    try{
     // console.log(req.params)
     const campground = await Campground.findById(req.params.id);
     res.render('campgrounds/show', {campground});
+    } catch(e) {
+        next(e);
+    }
 })
 
 // edit campground
-app.get('/campgrounds/:id/edit', async(req, res) => {
+app.get('/campgrounds/:id/edit', async(req, res, next) => {
+    try{
     const campground = await Campground.findById(req.params.id);
     res.render('campgrounds/edit', {campground})
+    } catch(e) {
+        next(e);
+    }
 })
 
 // put request to update campground
-app.put('/campgrounds/:id', async(req, res) => {
+app.put('/campgrounds/:id', async(req, res, next) => {
+    try{
     const {id} = req.params;
     // {...req.body.campground} --> spread operator can also be used insted of req.body.campground
     const campground = await Campground.findByIdAndUpdate(id, req.body.campground)
     res.redirect(`/campgrounds/${campground._id}`)
+    } catch(e) {
+        next(e);
+    }
 })
 
 // delete campground
-app.delete('/campgrounds/:id', async(req, res) => {
+app.delete('/campgrounds/:id', async(req, res, next) => {
+    try{
     const {id} = req.params;
     const campground = await Campground.findByIdAndDelete(id);
     console.log(`Delete Successfully!`)
     res.redirect('/campgrounds');
+    } catch(e) {
+        next(e)
+    }
 })
 
+// create custom error handler
+app.use((err, req, res, next) => {
+    // console.log(err)
+    console.log(`Owshiii!!!! Something went wrong! :(`)
+    res.send(`Owshii! Something went wrong! :<`)
+})
 
 app.listen(3000, () => {
     console.log(`On port 3000!!!`)
