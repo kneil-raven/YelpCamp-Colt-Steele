@@ -5,6 +5,7 @@ const ejsMate = require('ejs-mate');
 const path = require('path');
 const mongoose = require('mongoose');
 const Campground = require('./models/campground');
+const ExpressError = require('./utils/ExpressError');
 const catchAsync = require('./utils/catchAsync');
 
 // connect Mongoose
@@ -98,12 +99,22 @@ app.delete('/campgrounds/:id', catchAsync(async(req, res, next) => {
     res.redirect('/campgrounds');
 }));
 
+// method that matches all HTTP verbs (GET, POST, PUT, DELETE')
+app.all('*', (req, res, next) => {
+    // we will pass the error to the next custom error handler which is the app.use()
+    next(new ExpressError(`Page Not Found!`, 404))
+})
+
+
 // create custom error handler
 app.use((err, req, res, next) => {
     // console.log(err)
     console.log(`Owshiii!!!!`)
     // display error message on console
-    console.log(err.message)
+    // console.log(err.message)
+    // destructure from error
+    const {statusCode = 500, message = 'Something went viral'} = err;
+    res.status(statusCode).send(message);
     res.send(`Boy! Something went wrong! :<`)
 })
 
