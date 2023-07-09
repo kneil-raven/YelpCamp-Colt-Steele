@@ -3,6 +3,7 @@ const methodOverride = require('method-override');
 const app = express();
 const ejsMate = require('ejs-mate');
 const path = require('path');
+const Joi = require('joi');
 const mongoose = require('mongoose');
 const Campground = require('./models/campground');
 const ExpressError = require('./utils/ExpressError');
@@ -65,6 +66,30 @@ app.get('/campgrounds/new', (req, res) => {
 
 // create new campground in the database
 app.post('/campgrounds', catchAsync(async(req, res, next) => {
+    // display error in postman, because there is already client-side form validation if we left some areas in the form to be blank
+    // if(!req.body.campground) throw new ExpressError('Invalid Campground Data', 400);
+
+    // create a schema to check using joi npm
+    const campgroundSchema = Joi.object({
+        campground: Joi.object({
+            title: Joi.string().required(),
+            price: Joi.number().required().min(0),
+            image: Joi.string().required(),
+            location: Joi.string().required(),
+            description: Joi.string().required()
+        }).required()
+    })
+    // validate the form 
+    const {error} = campgroundSchema.validate(req.body);
+    // display the JSON error and details using code below
+    // const result = campgroundSchema.validate(req.body);
+    // console.log(result)
+    if(error) {
+        const msg = error.details.map(el => el.message).join(',')
+        throw new ExpressError(msg, 400);
+    }
+
+    console.log(result);
     const campground = new Campground(req.body.campground);
     await campground.save();
     res.redirect(`/campgrounds/${campground._id}`)
@@ -100,6 +125,7 @@ app.delete('/campgrounds/:id', catchAsync(async(req, res, next) => {
 }));
 
 // method that matches all HTTP verbs (GET, POST, PUT, DELETE')
+// error 404 handler
 app.all('*', (req, res, next) => {
     // we will pass the error to the next custom error handler which is the app.use()
     next(new ExpressError(`Page Not Found!`, 404))
