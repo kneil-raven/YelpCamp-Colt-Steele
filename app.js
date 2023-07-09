@@ -113,9 +113,10 @@ app.use((err, req, res, next) => {
     // display error message on console
     // console.log(err.message)
     // destructure from error
-    const {statusCode = 500, message = 'Something went viral'} = err;
-    res.status(statusCode).send(message);
-    res.send(`Boy! Something went wrong! :<`)
+    const {statusCode = 500} = err;
+    // display custom error message
+    if(!err.message) err.message = 'Oh No, Something Went Wrong!!!'
+    res.status(statusCode).render('error', {err});
 })
 
 app.listen(3000, () => {
