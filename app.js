@@ -4,6 +4,7 @@ const app = express();
 const ejsMate = require('ejs-mate');
 const path = require('path');
 const Joi = require('joi');
+const {campgroundSchema} = require('./schemas.js');
 const mongoose = require('mongoose');
 const Campground = require('./models/campground');
 const ExpressError = require('./utils/ExpressError');
@@ -48,6 +49,24 @@ app.get('/', (req, res) => {
     res.render('home')
 })
 
+// define JOI validation middleware
+const validateCampground = (req, res, next) => {
+
+    // validate the form 
+    const {error} = campgroundSchema.validate(req.body);
+    // display the JSON error and details using code below
+    // const result = campgroundSchema.validate(req.body);
+    // console.log(result)
+    if(error) {
+        const msg = error.details.map(el => el.message).join(',')
+        throw new ExpressError(msg, 400);
+    } else {
+        next()
+    }
+
+
+}
+
 
 /*=================================
 Campgrounds Section Starts Here
@@ -65,31 +84,12 @@ app.get('/campgrounds/new', (req, res) => {
 })
 
 // create new campground in the database
-app.post('/campgrounds', catchAsync(async(req, res, next) => {
+app.post('/campgrounds', validateCampground, catchAsync(async(req, res, next) => {
     // display error in postman, because there is already client-side form validation if we left some areas in the form to be blank
     // if(!req.body.campground) throw new ExpressError('Invalid Campground Data', 400);
 
-    // create a schema to check using joi npm
-    const campgroundSchema = Joi.object({
-        campground: Joi.object({
-            title: Joi.string().required(),
-            price: Joi.number().required().min(0),
-            image: Joi.string().required(),
-            location: Joi.string().required(),
-            description: Joi.string().required()
-        }).required()
-    })
-    // validate the form 
-    const {error} = campgroundSchema.validate(req.body);
-    // display the JSON error and details using code below
-    // const result = campgroundSchema.validate(req.body);
-    // console.log(result)
-    if(error) {
-        const msg = error.details.map(el => el.message).join(',')
-        throw new ExpressError(msg, 400);
-    }
+    // create a schema to check using joi npm(part 457)
 
-    console.log(result);
     const campground = new Campground(req.body.campground);
     await campground.save();
     res.redirect(`/campgrounds/${campground._id}`)
@@ -109,7 +109,7 @@ app.get('/campgrounds/:id/edit', catchAsync(async(req, res, next) => {
 }));
 
 // put request to update campground
-app.put('/campgrounds/:id', catchAsync(async(req, res, next) => {
+app.put('/campgrounds/:id', validateCampground, catchAsync(async(req, res, next) => {
     const {id} = req.params;
     // {...req.body.campground} --> spread operator can also be used insted of req.body.campground
     const campground = await Campground.findByIdAndUpdate(id, req.body.campground)
